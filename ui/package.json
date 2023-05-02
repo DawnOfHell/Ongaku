@@ -34,6 +34,7 @@
 		"autoprefixer": "^10.4.7",
 		"tailwindcss": "^3.1.5",
 		"@tailwindcss/forms": "^0.5.2",
+		"@tailwindcss/typography": "^0.5.3",
 		"daisyui": "^2.18.1"
 	},
 	"type": "module"
