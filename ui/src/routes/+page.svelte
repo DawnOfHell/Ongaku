@@ -1,2 +1,4 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<h1 class="justify-self-center">Welcome to Ongaku Quiz</h1>
+<div class="grid">
+    <a class="btn btn-primary btn-block" href="/play/solo">Start</a>
+</div>
