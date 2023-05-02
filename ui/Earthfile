@@ -1,0 +1,25 @@
+VERSION 0.7
+FROM node:LTS
+
+deps:
+    COPY package.json ./
+    COPY package-lock.json ./
+    RUN npm ci
+
+check-format:
+    FROM +deps
+    COPY . .
+    RUN npm run lint
+    RUN npm run check
+
+build:
+    FROM +deps
+    COPY . .
+    RUN npm run build
+    SAVE ARTIFACT build
+
+docker:
+    COPY +build .
+    ARG tag='latest'
+    ENTRYPOINT ["node", "build"]
+    SAVE IMAGE ongaku-ui:$tag
