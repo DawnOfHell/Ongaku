@@ -1,0 +1,3 @@
+<PlayersScoreboard/>
+<SongTimer/>
+<GameChat/>
