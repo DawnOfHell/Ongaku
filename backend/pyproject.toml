@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = ["Dawn Heller <shahar.heller3@gmail.com>",
+           "Yuval levi <yuvall9313@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.95.1"
+pydantic = "^1.10.7"
+websocket = "^0.2.1"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.0.264"
+pytest = "^7.3.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
