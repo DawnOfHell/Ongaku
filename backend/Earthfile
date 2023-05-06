@@ -6,7 +6,6 @@ deps:
     RUN pip install poetry
     COPY pyproject.toml ./
     COPY poetry.lock ./
-    RUN poetry build
 
 build:
     FROM +deps

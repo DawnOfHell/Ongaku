@@ -1,5 +1,5 @@
 VERSION 0.7
-FROM node:LTS
+FROM node:lts-alpine
 
 deps:
     COPY package.json ./
@@ -20,6 +20,6 @@ build:
 
 docker:
     COPY +build .
-    ARG tag='latest'
+    ARG tag="latest"
     ENTRYPOINT ["node", "build"]
     SAVE IMAGE ongaku-ui:$tag
