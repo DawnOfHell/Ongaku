@@ -23,7 +23,6 @@ async def create_player(player_name: PlayerName,
     players.update({unique_id: player_name.player_name})
     return PlayerId(player_id=unique_id)
 
-
 @router.delete("/delete_player", tags=["player"],
                status_code=status.HTTP_200_OK)
 async def delete_player(player_id: PlayerId,

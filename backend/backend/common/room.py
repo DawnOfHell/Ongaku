@@ -25,3 +25,17 @@ class Room:
 
     def add_player(self, player: Player):
         self._players.update({player.id: player})
+
+    def update_leader(self, player_id, new_leader_id):
+        player = self._players.get(player_id)
+        new_leader = self._players.get(new_leader_id)
+        if not player or not new_leader:
+            return "One of the given ids does not exist"
+
+        if not player.leader:
+            return "Sender id not room admin"
+
+        player.leader = False
+        new_leader.leader = True
+
+

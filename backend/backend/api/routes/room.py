@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, status, Response
 
 from backend.common.room import Room
 from backend.common.player import Player
-from backend.api.models.room import RoomId
+from backend.api.models.room import RoomId, UpdateLeader
 from backend.api.models.player import PlayerId
 from backend.api.routes.player import get_players
 
@@ -68,9 +68,9 @@ async def enter_room(room_id: RoomId,
     room.add_player(player)
 
 
-@router.get("/get_room_players/", tags=["room"],
+@router.post("/get_room_players/", tags=["room"],
             status_code=status.HTTP_200_OK,
-            response_model=Union[list, str])
+            response_model=Union[list[Player], str])
 async def get_room_players(room_id: RoomId,
                       rooms: Annotated[dict[str, Room], Depends(get_rooms)],
                       response: Response):
@@ -79,7 +79,25 @@ async def get_room_players(room_id: RoomId,
         response.status_code = status.HTTP_404_NOT_FOUND
         return f"no such room {room_id.room_id}"
 
-    return [player.name for player in list(room.players.values())]
+    return list(room.players.values())
+
+
+@router.put("/change_room_leader/", tags=["room"],
+            status_code=status.HTTP_204_NO_CONTENT)
+async def update_room_leader(update_leader: UpdateLeader,
+                             rooms: Annotated[dict[str, Room], Depends(get_rooms)],
+                             response: Response):
+    room = rooms.get(update_leader.room_id.room_id)
+    if not room:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return "Room does not exist!"
+
+    response_from_room = room.update_leader(player_id=update_leader.player_id.player_id,
+                       new_leader_id=update_leader.new_leader_id.player_id)
+
+    if response_from_room:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return response_from_room
 
 
 @router.delete("/delete_room/", tags=["room"],
