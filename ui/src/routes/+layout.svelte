@@ -2,6 +2,6 @@
 	import '../app.postcss';
 </script>
 
-<div class="prose lg:prose-xl mx-auto max-h-screen h-screen grid grid-rows-12 content-center">
+<div class="prose lg:prose-xl max-h-screen h-screen max-w-none w-screen">
 	<slot />
 </div>
