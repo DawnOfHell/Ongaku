@@ -6,15 +6,15 @@ from fastapi import APIRouter, Depends, status
 
 from backend.api.models.player import PlayerId, PlayerName
 
-router = APIRouter()
+router = APIRouter(tags=["player"])
 
 
 @lru_cache
-def get_players() -> dict:
+def get_players() -> dict[str, str]:
     return {}
 
 
-@router.post("/create_player/", tags=["player"],
+@router.post("/players/",
              status_code=status.HTTP_202_ACCEPTED,
              response_model=PlayerId)
 async def create_player(player_name: PlayerName,
@@ -23,13 +23,12 @@ async def create_player(player_name: PlayerName,
     players.update({unique_id: player_name.player_name})
     return PlayerId(player_id=unique_id)
 
-@router.delete("/delete_player", tags=["player"],
+
+@router.delete("/delete_player",
                status_code=status.HTTP_200_OK)
 async def delete_player(player_id: PlayerId,
                         players: Annotated[dict[str, str], Depends(get_players)]):
     player = players.get(player_id.player_id)
 
-    if not player:
-        return
-
-    players.pop(player_id.player_id)
+    if player:
+        return players.pop(player_id.player_id)
