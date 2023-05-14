@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Player:
+class RoomMember:
     id: str
     name: str
     score: int = 0

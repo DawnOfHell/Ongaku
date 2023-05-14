@@ -1,9 +1,6 @@
 from pydantic import BaseModel
 
 
-class PlayerId(BaseModel):
-    player_id: str
-
-
-class PlayerName(BaseModel):
+class Player(BaseModel):
     player_name: str
+    player_id: str

@@ -1,18 +1,19 @@
 import uuid
 
-from fastapi import HTTPException, status
 from cached_property import cached_property
 
-from .player import Player
+from .member import RoomMember
+
+from backend.api.errors.room import PlayerNotInRoom, PlayerIsNotLeader
 
 
 class Room:
     def __init__(self):
-        self._players = {}
+        self._members = {}
 
     @property
-    def players(self):
-        return self._players
+    def members(self):
+        return self._members
 
     @property
     def leader(self):
@@ -24,21 +25,18 @@ class Room:
     def room_id(self):
         return uuid.uuid4().hex[0:6]
 
-    def add_player(self, player: Player):
-        self._players.update({player.id: player})
+    def add_member(self, member: RoomMember):
+        self._members.update({member.id: member})
 
     def update_leader(self, player_id, new_leader_id):
-        player = self._players.get(player_id)
-        new_leader = self._players.get(new_leader_id)
+        player = self._members.get(player_id)
+        new_leader = self._members.get(new_leader_id)
 
         if not player or not new_leader:
-            raise HTTPException(
-                detail="One of the given player ids does not exist in room",
-                status_code=status.HTTP_404_NOT_FOUND)
+            raise PlayerNotInRoom(players=[player_id, new_leader_id])
 
         if not player.leader:
-            raise HTTPException(detail=f"Player {player.name} is not room admin",
-                                status_code=status.HTTP_401_UNAUTHORIZED)
+            raise PlayerIsNotLeader(player_name=player.name)
 
         player.leader = False
         new_leader.leader = True

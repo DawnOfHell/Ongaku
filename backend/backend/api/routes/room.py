@@ -4,96 +4,77 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, HTTPException
 
 from backend.common.room import Room
-from backend.common.player import Player
-from backend.api.models.room import RoomId, UpdateLeader
-from backend.api.models.player import PlayerId
-from backend.api.routes.player import get_players
+from backend.common.member import RoomMember
+from backend.api.models.room import RoomId
+from backend.api.routes.player import get_other_by_id, get_player_by_id
+from backend.api.models.player import Player
 
 router = APIRouter(tags=["rooms"])
 
 
 @lru_cache
-def get_rooms() -> dict[str, Room]:
+def rooms() -> dict[str, Room]:
     return {}
 
 
-@router.post("/rooms/", status_code=status.HTTP_201_CREATED,
+def get_room_by_id(room_id: str,
+                rooms: Annotated[dict[str, str], Depends(rooms)]):
+    room = rooms.get(room_id)
+    if not room:
+        raise HTTPException(detail=f"room id {room_id} does not exist!",
+                            status_code=status.HTTP_404_NOT_FOUND)
+
+    return room
+
+
+@router.post("/rooms/{player_id}", status_code=status.HTTP_201_CREATED,
              response_model=RoomId)
-async def create_room(player_id: PlayerId,
-                      rooms: Annotated[dict[str, Room], Depends(get_rooms)],
-                      players: Annotated[dict[str, str], Depends(get_players)]):
+async def create_room(player: Annotated[Player, Depends(get_player_by_id)],
+                      rooms: Annotated[dict[str, Room], Depends(rooms)]):
     room = Room()
-    player_name = players.get(player_id.player_id)
 
-    if not player_name:
-        raise HTTPException(detail=f"no user under given id {player_id.player_id}",
-                             status_code=status.HTTP_404_NOT_FOUND)
-
-    player = Player(id=player_id.player_id,
-                    name=player_name)
+    player = RoomMember(id=player.player_id,
+                        name=player.player_name)
     player.leader = True
-    room.add_player(player)
+    room.add_member(player)
     rooms.update({room.room_id: room})
     return RoomId(room_id=room.room_id)
 
 
-@router.post("/enter_room/room_id",
+@router.post("/enter_room/{room_id}/{player_id}",
              status_code=status.HTTP_202_ACCEPTED)
-async def enter_room(room_id: RoomId,
-                     player_id: PlayerId,
-                     rooms: Annotated[dict[str, Room], Depends(get_rooms)],
-                     players: Annotated[dict[str, str], Depends(get_players)]):
-    room = rooms.get(room_id.room_id)
-    if not room:
-        return HTTPException(detail=f"no such room {room_id.room_id}",
-                             status_code=status.HTTP_404_NOT_FOUND)
-
-    player_in_room = room.players.get(player_id.player_id)
+async def enter_room(room: Annotated[Room, Depends(get_room_by_id)],
+                     player: Annotated[Player, Depends(get_player_by_id)]):
+    player_in_room = room.members.get(player.player_id)
     if player_in_room:
-        return
+        return {}
 
-    player_name = players.get(player_id.player_id)
+    player = RoomMember(id=player.player_id,
+                        name=player.player_name)
 
-    if not player_name:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                             detail=f"no user under given id {player_id.player_id}")
+    room.add_member(player)
 
-    player = Player(id=player_id.player_id,
-                    name=player_name)
-
-    room.add_player(player)
+    return RoomMember
 
 
-@router.post("/get_room_players/",
+@router.post("/room_players/{room_id}",
             status_code=status.HTTP_200_OK,
-            response_model=list[Player])
-async def get_room_players(room_id: RoomId,
-                      rooms: Annotated[dict[str, Room], Depends(get_rooms)]):
-    room = rooms.get(room_id.room_id)
-    if not room:
-        raise HTTPException(detail=f"no such room {room_id.room_id}",
-                             status_code=status.HTTP_404_NOT_FOUND)
-
-    return list(room.players.values())
+            response_model=list[RoomMember])
+async def get_room_players(room: Annotated[Room, Depends(get_room_by_id)]):
+    return list(room.members.values())
 
 
-@router.put("/change_room_leader/",
+@router.put("/room_leader/{room_id}/{player_id}/{other_id}",
             status_code=status.HTTP_204_NO_CONTENT)
-async def update_room_leader(update_leader: UpdateLeader,
-                             rooms: Annotated[dict[str, Room], Depends(get_rooms)]):
-    room = rooms.get(update_leader.room_id)
-    if not room:
-        raise HTTPException(detail="Room does not exist!",
-                             status_code=status.HTTP_404_NOT_FOUND)
-
-    room.update_leader(player_id=update_leader.player_id,
-                       new_leader_id=update_leader.new_leader_id)
+async def update_room_leader(room: Annotated[Room, Depends(get_room_by_id)],
+                             player: Annotated[Player, Depends(get_player_by_id)],
+                             other: Annotated[Player, Depends(get_other_by_id)]):
+    room.update_leader(player_id=player.player_id,
+                       new_leader_id=other.player_id)
 
 
-@router.delete("/delete_room/",
+@router.delete("/rooms/{room_id}",
                status_code=status.HTTP_200_OK)
-async def delete_room(room_id: RoomId,
-                      rooms: Annotated[dict[str, Room], Depends(get_rooms)]):
-    room = rooms.get(room_id.room_id)
-    if room:
+async def delete_room(room: Annotated[Room,Depends(get_room_by_id)],
+                      rooms: Annotated[dict[str, Room], Depends(rooms)]):
         return rooms.pop(room.room_id)
