@@ -17,7 +17,7 @@ def get_rooms() -> dict[str, Room]:
     return {}
 
 
-@router.post("/rooms/", status_code=status.HTTP_201_CREATED,
+@router.post("/rooms", status_code=status.HTTP_201_CREATED,
              response_model=RoomId)
 async def create_room(player_id: PlayerId,
                       rooms: Annotated[dict[str, Room], Depends(get_rooms)],
