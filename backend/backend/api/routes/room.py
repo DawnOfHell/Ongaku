@@ -5,9 +5,11 @@ from fastapi import APIRouter, Depends, status, HTTPException
 
 from backend.common.room import Room
 from backend.common.member import RoomMember
+
 from backend.api.models.room import RoomId
-from backend.api.routes.player import get_other_by_id, get_player_by_id
 from backend.api.models.player import Player
+
+from backend.api.routes.player import get_other_by_id, get_player_by_id
 
 router = APIRouter(tags=["rooms"])
 
