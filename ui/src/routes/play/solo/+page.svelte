@@ -7,12 +7,12 @@
 </script>
 
 {#if roomId}
-<h1 class="mx-auto">Start guessing!</h1>
+<h1>Start guessing!</h1>
 <Game/>
 {:else}
-<h1 class="mx-auto">Play solo</h1>
-<div>
+<h1>Play solo</h1>
+<div class="w-11/12 align-center">
     <CategoryPicker/>
+    <button class="btn btn-primary mx-auto btn-block">Play</button>
 </div>
-<button class="btn btn-primary mx-auto btn-block">Play</button>
 {/if}
