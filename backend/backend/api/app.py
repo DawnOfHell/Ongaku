@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.exception_handlers import http_exception_handler
 
-from backend.api.errors import room as room_errors
+from backend.errors import room as room_errors
 from .routes import room, player
 
 app = FastAPI()

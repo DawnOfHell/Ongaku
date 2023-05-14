@@ -4,7 +4,7 @@ from cached_property import cached_property
 
 from .member import RoomMember
 
-from backend.api.errors.room import PlayerNotInRoom, PlayerIsNotLeader
+from backend.errors.room import PlayerNotInRoom, PlayerIsNotLeader
 
 
 class Room:
@@ -18,7 +18,7 @@ class Room:
     @property
     def leader(self):
         leader = next(filter(lambda player: player.leader
-                             , self._players.values()))
+                             , self._members.values()))
         return leader
 
     @cached_property
