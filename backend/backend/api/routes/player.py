@@ -1,7 +1,7 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Body
 
 from backend.api.models.player import Player
 from backend.api.dependencies.player import players, get_player_by_id
@@ -9,10 +9,10 @@ from backend.api.dependencies.player import players, get_player_by_id
 router = APIRouter(tags=["player"])
 
 
-@router.post("/players/{player_name}",
+@router.post("/players",
              status_code=status.HTTP_202_ACCEPTED,
              response_model=Player)
-async def create_player(player_name: str,
+async def create_player(player_name: Annotated[str, Body(embed=True)],
                         players: Annotated[dict[str, str], Depends(players)]):
     unique_id = f"{player_name}-{uuid.uuid4().hex[0:6]}"
     players.update({unique_id: player_name})

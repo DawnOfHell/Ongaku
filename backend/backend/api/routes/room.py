@@ -1,4 +1,3 @@
-from functools import lru_cache
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
@@ -10,14 +9,16 @@ from backend.api.models.room import RoomId
 from backend.api.models.player import Player
 
 from backend.api.dependencies.room import rooms, get_room_by_id
-from backend.api.dependencies.player import get_player_by_id, get_other_by_id
+from backend.api.dependencies.player import (get_player_by_id,
+                                             get_other_by_id,
+                                             get_player_by_id_body)
 
 router = APIRouter(tags=["rooms"])
 
 
-@router.post("/rooms/{player_id}", status_code=status.HTTP_201_CREATED,
+@router.post("/rooms", status_code=status.HTTP_201_CREATED,
              response_model=RoomId)
-async def create_room(player: Annotated[Player, Depends(get_player_by_id)],
+async def create_room(player: Annotated[Player, Depends(get_player_by_id_body)],
                       rooms: Annotated[dict[str, Room], Depends(rooms)]):
     room = Room()
 
@@ -45,7 +46,7 @@ async def enter_room(room: Annotated[Room, Depends(get_room_by_id)],
     return RoomMember
 
 
-@router.post("/rooms/{room_id}/players",
+@router.get("/rooms/{room_id}/players",
             status_code=status.HTTP_200_OK,
             response_model=list[RoomMember])
 async def get_room_players(room: Annotated[Room, Depends(get_room_by_id)]):
@@ -55,7 +56,7 @@ async def get_room_players(room: Annotated[Room, Depends(get_room_by_id)]):
 @router.put("/room_leader/{room_id}/leader",
             status_code=status.HTTP_204_NO_CONTENT)
 async def update_room_leader(room: Annotated[Room, Depends(get_room_by_id)],
-                             player: Annotated[Player, Depends(get_player_by_id)],
+                             player: Annotated[Player, Depends(get_player_by_id_body)],
                              other: Annotated[Player, Depends(get_other_by_id)]):
     room.update_leader(player_id=player.player_id,
                        new_leader_id=other.player_id)
@@ -63,6 +64,6 @@ async def update_room_leader(room: Annotated[Room, Depends(get_room_by_id)],
 
 @router.delete("/rooms/{room_id}",
                status_code=status.HTTP_200_OK)
-def delete_room(room: Annotated[Room,Depends(get_room_by_id)],
-                      rooms: Annotated[dict[str, Room], Depends(rooms)]):
-        return rooms.pop(room.room_id)
+def delete_room(room: Annotated[Room, Depends(get_room_by_id)],
+                rooms: Annotated[dict[str, Room], Depends(rooms)]):
+    return rooms.pop(room.room_id)

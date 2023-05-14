@@ -1,7 +1,7 @@
 from typing import Annotated
 from functools import lru_cache
 
-from fastapi import status, HTTPException, Depends
+from fastapi import status, HTTPException, Depends, Body
 
 from backend.api.models.player import Player
 
@@ -20,7 +20,12 @@ def get_player_by_id(player_id: str,
     return Player(player_id=player_id, player_name=player)
 
 
-def get_other_by_id(other_id:str,
+def get_player_by_id_body(player_id: Annotated[str, Body(embed=True)],
+                          players: Annotated[dict[str, str], Depends(players)]):
+    return get_player_by_id(player_id, players)
+
+
+def get_other_by_id(other_id: Annotated[str, Body(embed=True)],
                     players:Annotated[dict[str, str], Depends(players)]):
     player = players.get(other_id)
 

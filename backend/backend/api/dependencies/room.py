@@ -1,7 +1,7 @@
 from typing import Annotated
 from functools import lru_cache
 
-from fastapi import status, Depends, HTTPException
+from fastapi import status, Depends, HTTPException, Body
 
 from backend.common.room import Room
 
@@ -19,3 +19,8 @@ def get_room_by_id(room_id: str,
                             status_code=status.HTTP_404_NOT_FOUND)
 
     return room
+
+
+def get_room_by_id_body(room_id: Annotated[str, Body(embed=True)],
+                        rooms: Annotated[dict[str, str], Depends(rooms)]):
+    return get_room_by_id(room_id, rooms)
