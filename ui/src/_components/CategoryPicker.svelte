@@ -1,5 +1,5 @@
 <script>
-    import GenreCard from './GenreCard.svelte'
+	import GenreCard from './GenreCard.svelte';
 </script>
 
 <h2>Pick your category:</h2>
