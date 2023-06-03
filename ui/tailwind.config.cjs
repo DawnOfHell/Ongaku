@@ -6,7 +6,11 @@ const config = {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 
 	theme: {
-		extend: {}
+		extend: {
+			gridTemplateColumns: {
+				'game': '1fr minmax(400px, 3fr) 1.5fr',
+			}
+		}
 	},
 
 	plugins: [forms, typography, daisyui]
