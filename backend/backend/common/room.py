@@ -59,14 +59,19 @@ class Room:
         for member in self._members.values():
             await member.websocket.send(serializable_message)
 
-    async def _on_receive_callback(self, member: RoomMember, message: Any):
-        new_message = None
-        if self.turn.current_song and message.content == self.turn.current_song:
-            score = self.turn.calculate_score(message)
-            new_message = member.add_to_score(score)
-        await self._broadcast(new_message or ContentFromClient(sender=member.name, text=message))
+    async def _on_receive_callback(self, member: RoomMember, content: Any):
+        new_content = None
+        if self.turn.current_song and content.content == self.turn.current_song:
+            score = self.turn.calculate_score(content)
+            new_content = member.add_to_score(score)
+
+        message = new_content or ContentFromClient(sender=member.name,
+                                                   text=content)
+        await self._broadcast(message)
 
     async def upgrade_to_ws(self, player_id: str, websocket: WebSocket):
         member = self.get_room_member(player_id)
-        member.websocket = GameWebsocketHandler(member, websocket, self._on_receive_callback)
+        member.websocket = GameWebsocketHandler(member,
+                                                websocket,
+                                                self._on_receive_callback)
         return member

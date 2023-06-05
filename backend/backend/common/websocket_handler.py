@@ -1,4 +1,3 @@
-import datetime
 from typing import TypeVar, Callable
 
 from .message import Message
