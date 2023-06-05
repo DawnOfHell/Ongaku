@@ -48,9 +48,9 @@ async def enter_room(room: Annotated[Room, Depends(get_room_by_id)],
 
 @router.get("/rooms/{room_id}/players",
             status_code=status.HTTP_200_OK,
-            response_model=list[RoomMember])
+            response_model=list[dict])
 async def get_room_players(room: Annotated[Room, Depends(get_room_by_id)]):
-    return list(room.members.values())
+    return [value.data for value in room.members.values()]
 
 
 @router.put("/room_leader/{room_id}/leader",
