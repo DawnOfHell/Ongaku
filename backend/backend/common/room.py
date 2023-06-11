@@ -1,7 +1,8 @@
 import uuid
 from typing import Any
 from datetime import datetime
-from .message import Message, ContentFromClient
+from pydantic import BaseModel
+from .message import Message, ClientContent
 from cached_property import cached_property
 
 from .turn import Turn
@@ -53,20 +54,20 @@ class Room:
 
         return member
 
-    async def _broadcast(self, message):
-        serializable_message = Message(timestamp=datetime.now(),
-                                       content=message)
+    async def _broadcast(self, message: BaseModel):
+        message = Message(timestamp=datetime.now(),
+                          content=message)
         for member in self._members.values():
-            await member.websocket.send(serializable_message)
+            await member.websocket.send(message)
 
     async def _on_receive(self, member: RoomMember, payload: Any):
         new_content = None
-        if self.turn.current_song and payload.content == self.turn.current_song:
-            score = self.turn.calculate_score(payload)
-            new_content = member.add_to_score(score)
+        # if self.turn.current_song and payload.content == self.turn.current_song:
+        #     score = self.turn.calculate_score(payload)
+        #     new_content = member.add_to_score(score)
 
-        message = new_content or ContentFromClient(sender=member.name,
-                                                   text=payload)
+        message = new_content or ClientContent(sender=member.name,
+                                               text=payload)
         await self._broadcast(message)
 
     async def upgrade_to_ws(self, player_id: str, websocket: WebSocket):

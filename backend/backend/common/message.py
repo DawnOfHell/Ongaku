@@ -1,7 +1,5 @@
-import json
-from typing import Protocol
-from datetime import datetime
-from dataclasses import dataclass
+from pydantic import BaseModel, validator
+
 # This module describes how we want a message will appear on our websocket.
 
 VERSION = '1'
@@ -10,54 +8,27 @@ VERSION = '1'
 # every content-type will inherit from abstract class.
 
 
-class Content(Protocol):
-    def serializable(self) -> dict: ...
-
-
-@dataclass
-class ContentFromClient:
+class ClientContent(BaseModel):
     sender: str
     text: str
 
-    def serializable(self):
-        return {"sender": self.sender,
-                "text": self.text}
 
-
-@dataclass
-class AnswerContent:
+class AnswerContent(BaseModel):
     sender: str
     time_laps: float
     answer: str
 
-    def serializable(self):
-        return {"sender": self.sender,
-                "time_laps": self.time_laps,
-                "answer": self.answer}
 
-
-@dataclass
-class UpdateScore:
+class UpdateScoreContent(BaseModel):
     player_id: str
     new_score: str
 
-    def serializable(self):
-        return {"player_id": self.player_id,
-                "new_score": self.new_score}
 
-
-@dataclass
-class Message:
-    content: Content
-    timestamp: datetime
+class Message(BaseModel):
+    timestamp: str
     version: str = VERSION
+    content: BaseModel
 
-    @property
-    def formatted_time(self):
-        return self.timestamp.strftime('%d/%m/%y-%H:%M:%S')
-
-    @property
-    def json(self):
-        return json.dumps({"timestamp": self.formatted_time,
-                           "content": self.content.serializable(),
-                           "version": self.version})
+    @validator("timestamp", pre=True)
+    def formatted_timestamp(cls, timestamp):
+        return timestamp.strftime('%d/%m/%y-%H:%M:%S')
