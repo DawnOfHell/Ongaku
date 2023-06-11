@@ -4,16 +4,16 @@ from datetime import datetime
 from .message import Message, ContentFromClient
 from cached_property import cached_property
 
-from .member import RoomMember
 from .turn import Turn
+from .member import RoomMember
 
-from backend.errors.room import PlayerNotInRoom, PlayerIsNotLeader
+from backend.errors.room import PlayerNotInRoomError, PlayerIsNotLeaderError
 from backend.common.websocket_handler import GameWebsocketHandler, WebSocket
 
 
 class Room:
     def __init__(self):
-        self._members: dict = {}
+        self._members: dict[str, RoomMember] = {}
         self.turn: Turn = None
 
     @property
@@ -38,10 +38,10 @@ class Room:
         new_leader = self._members.get(new_leader_id)
 
         if not player or not new_leader:
-            raise PlayerNotInRoom(players=[player_id, new_leader_id])
+            raise PlayerNotInRoomError(players=[player_id, new_leader_id])
 
         if not player.leader:
-            raise PlayerIsNotLeader(player_name=player.name)
+            raise PlayerIsNotLeaderError(player_name=player.name)
 
         player.leader = False
         new_leader.leader = True
@@ -49,7 +49,7 @@ class Room:
     def get_room_member(self, player_id: str) -> RoomMember:
         member = self._members.get(player_id)
         if not member:
-            raise PlayerNotInRoom(players=[player_id])
+            raise PlayerNotInRoomError(players=[player_id])
 
         return member
 
@@ -59,19 +59,19 @@ class Room:
         for member in self._members.values():
             await member.websocket.send(serializable_message)
 
-    async def _on_receive_callback(self, member: RoomMember, content: Any):
+    async def _on_receive(self, member: RoomMember, payload: Any):
         new_content = None
-        if self.turn.current_song and content.content == self.turn.current_song:
-            score = self.turn.calculate_score(content)
+        if self.turn.current_song and payload.content == self.turn.current_song:
+            score = self.turn.calculate_score(payload)
             new_content = member.add_to_score(score)
 
         message = new_content or ContentFromClient(sender=member.name,
-                                                   text=content)
+                                                   text=payload)
         await self._broadcast(message)
 
     async def upgrade_to_ws(self, player_id: str, websocket: WebSocket):
         member = self.get_room_member(player_id)
         member.websocket = GameWebsocketHandler(member,
                                                 websocket,
-                                                self._on_receive_callback)
+                                                self._on_receive)
         return member

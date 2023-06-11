@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Union
 
 from fastapi import APIRouter, Depends, status
 
@@ -48,7 +48,7 @@ async def enter_room(room: Annotated[Room, Depends(get_room_by_id)],
 
 @router.get("/rooms/{room_id}/players",
             status_code=status.HTTP_200_OK,
-            response_model=list[dict])
+            response_model=list[dict[str, Union[str, int]]])
 async def get_room_players(room: Annotated[Room, Depends(get_room_by_id)]):
     return [value.data for value in room.members.values()]
 
