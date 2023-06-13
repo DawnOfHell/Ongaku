@@ -1,21 +1,27 @@
 VERSION 0.7
-FROM node:LTS
+FROM oven/bun
+
 
 deps:
     COPY package.json ./
-    COPY package-lock.json ./
-    RUN npm ci
+    COPY bun.lockb ./
+    RUN bun install
+
+dev:
+    FROM +deps
+    COPY . .
+    RUN bun run dev
 
 check-format:
     FROM +deps
     COPY . .
-    RUN npm run lint
-    RUN npm run check
+    RUN bun run lint
+    RUN bun run check
 
 build:
     FROM +deps
     COPY . .
-    RUN npm run build
+    RUN bun run build
     SAVE ARTIFACT build
 
 docker:

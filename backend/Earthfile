@@ -1,16 +1,21 @@
 VERSION 0.7
 FROM python:3.11
-WORKDIR /backend
+WORKDIR /server
 
 deps:
     RUN pip install poetry
     COPY pyproject.toml ./
     COPY poetry.lock ./
-    RUN poetry build
+    RUN poetry install
+
+dev:
+    FROM +deps
+    COPY . .
+    RUN poetry run uvicorn backend.api.app:app --reload --port 8080
 
 build:
     FROM +deps
-    COPY . backend
+    COPY . .
     COPY dist dist
     SAVE ARTIFACT backend /backend
     SAVE ARTIFACT dist /dist
