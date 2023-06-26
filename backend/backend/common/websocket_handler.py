@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import TypeVar, Callable
 
-from .message import Message
+from .message_dtos import Message
 
 WebSocket = TypeVar("WebSocket")
 RoomMember = TypeVar("RoomMember")

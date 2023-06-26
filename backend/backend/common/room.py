@@ -2,7 +2,7 @@ import uuid
 from typing import Any
 from datetime import datetime
 from pydantic import BaseModel
-from .message import Message, ClientContent
+from .message_dtos import Message, ClientContent
 from cached_property import cached_property
 
 from .turn import Turn
@@ -62,9 +62,9 @@ class Room:
 
     async def _on_receive(self, member: RoomMember, payload: Any):
         new_content = None
-        # if self.turn.current_song and payload.content == self.turn.current_song:
-        #     score = self.turn.calculate_score(payload)
-        #     new_content = member.add_to_score(score)
+        if self.turn.current_song and payload.content == self.turn.current_song:
+            score = self.turn.calculate_score(payload)
+            new_content = member.add_to_score(score)
 
         message = new_content or ClientContent(sender=member.name,
                                                text=payload)

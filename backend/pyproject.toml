@@ -19,7 +19,6 @@ websockets = "^11.0.3"
 ruff = "^0.0.264"
 pytest = "^7.3.1"
 ipdb = "^0.13.13"
-websocket-client = "^1.5.2"
 
 [tool.ruff]
 # Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.

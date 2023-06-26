@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from .message import UpdateScoreContent
+from .message_dtos import UpdateScoreContent
 
 from .websocket_handler import GameWebsocketHandler
 
@@ -15,4 +15,4 @@ class RoomMember(BaseModel):
     def add_to_score(self, score):
         self.score += score
         return UpdateScoreContent(player_id=self.id,
-                           new_score=self.score)
+                                  new_score=self.score)

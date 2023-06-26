@@ -1,11 +1,7 @@
 from pydantic import BaseModel, validator
 
-# This module describes how we want a message will appear on our websocket.
 
 VERSION = '1'
-
-# Once a more standard content will be made,
-# every content-type will inherit from abstract class.
 
 
 class ClientContent(BaseModel):

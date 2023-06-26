@@ -1,5 +1,3 @@
-
-
 class PlayerNotInRoomError(Exception):
     def __init__(self, players ,*args):
         super().__init__(*args)
